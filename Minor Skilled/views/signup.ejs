@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <div class="window auth window-anim">
+        <h1>Sign Up</h1>
+
+        <% if (errorMessage) { %>
+            <p class="error"><%= errorMessage %></p>
+        <% } %>
+
+        <form action="/auth/signup" method="POST">
+            <div class="auth-container">
+                <div>
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div>
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" name="password" minlength="6" required>
+                </div>
+                <button type="submit">Sign Up</button>
+            </div>
+        </form>
+        <br><hr><br>
+        <form action="/auth" method="GET">
+            <div class="auth-other-option">
+                <p>Already have your account? Then Sign In!</p>
+                <button type="submit">Sign In</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        document.querySelector("form").addEventListener("submit", function (e) {
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+
+            if (password.length < 6) {
+                e.preventDefault();
+                alert("Password must be at least 6 characters long.");
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Details</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <div class="book-details-page-container">
+        <section id="button-section" class="window window-anim" style="grid-area: a;">
+            <form method="GET" action="/dashboard">
+                <button type="submit">To Dashboard</button>
+            </form>
+            <% if (book && !book.saved) { %>
+                <form method="POST" action="/saveBook">
+                    <input type="hidden" name="google_books_id" value="<%= book.id %>">
+                    <button type="submit">Save to My Books</button>
+                </form>
+            <% } else if (book) { %>
+                <form method="POST" action="/removeBook">
+                    <input type="hidden" name="google_books_id" value="<%= book.id %>">
+                    <button type="submit">Remove from My Books</button>
+                </form>
+            <% } %>
+        </section>
+        <section class="window window-anim" style="grid-area: b;" id="book-details-start-section">
+            <div class="gradient"></div>   
+            <% if (book) { %>
+                <div class="cover-container">
+                    <img class="book-cover" 
+                    src="<%= book.cover %>" 
+                    alt="<%= book.title %>" />
+                    <div class="gradient"></div>
+                    <div class="title-container">
+                        <div class="title">
+                            <h3><%= book.title %></h3>
+                        </div>
+                    </div>  
+                </div> 
+                <div class="desc-container">
+                    <p class="left"><strong>Author(s)</strong></p>
+                    <p class="right"><%= book.author %></p>
+                </div>
+                <div class="desc-container">
+                    <p class="left"><strong>Genre(s)</strong></p>
+                    <p class="right genre"><%= book.genre %></p>
+                </div>
+                <div class="desc-container">
+                    <p class="left"><strong>Publisher</strong></p>
+                    <p class="right"><%= book.publisher %></p>
+                </div>
+                <div class="desc-container">
+                    <p class="left"><strong>Published</strong></p>
+                    <p class="right"><%= book.publishedYear %></p>
+                </div>
+                <div class="desc-container">
+                    <p class="left"><strong>Rating</strong></p>
+                    <p class="right"><%= book.rating %></p>
+                </div>
+                <div class="desc-container">
+                    <p class="left"><strong>Page Count</strong></p>
+                    <p class="right"><%= book.pageCount %></p>
+                </div>
+            <% } else { %>
+                <p>Sorry, no details available for this book.</p>
+            <% } %>
+        </section>
+        <section class="window window-anim" style="grid-area: c;" id="book-details-second-section">
+            <h2 class="dark-text"><strong>Description</strong></h2> 
+            <div class="description">
+                <% if (book.description) { %>
+                    <p><%- book.description %></p>
+                <% } else { %>
+                    <p>Sorry, no description available for this book.</p>
+                <% } %>
+            </div>
+        </section>
+        <section class="window window-anim" style="grid-area: d;" id="notes-section">
+            <h2 class="dark-text">Notes</h2>
+        
+                <ul class="notes-container">
+                    <% if (notes && notes.length > 0) { %>
+                    <% notes.forEach((note, index) => { %>
+                        <li class="note-container">
+                            <div class="edit-container" data-note-id="<%= note.id %>">
+                                <!-- Initially show Edit button -->
+                                <button class="edit-button" data-index="<%= index %>">Edit</button>
+                                <form method="POST" action="/deleteNote">
+                                    <input type="hidden" name="note_id" value="<%= note.id %>">
+                                    <button class="note-delete-btn" type="submit">-</button>
+                                </form>
+                            </div>
+                            <!-- Textarea and Save/Close buttons -->
+                            <form method="POST" action="/editNote" class="hidden edit-form">
+                                <input type="hidden" name="note_id" value="<%= note.id %>">
+                                <textarea name="note" ><%= note.note %></textarea>
+                                <div class="second-edit-container">
+                                    <button type="submit" class="save-button">Save</button>
+                                    <button type="button" class="close-button">Close</button>
+                                </div>
+                            </form>
+                            <!-- Note text container -->
+                            <div class="note-text window" data-index="<%= index %>">
+                                <p><%= note.note %></p>
+                            </div>
+                        </li>
+                    <% }) %>
+                    <% } else { %>
+                        <p>No notes yet. Add one below!</p>
+                    <% } %>
+                    <!-- Add note section -->
+                    <div class="add-container">
+                        <button id="add-note-button">+</button>
+                        <form method="POST" action="/addNote" class="hidden add-form">
+                            <input type="hidden" name="book_id" value="<%= book.id %>">
+                            <textarea name="note" placeholder="Add a note..."></textarea>
+                            <div class="second-edit-container">
+                                <button type="submit">Save</button>
+                                <button type="button" id="close-add-form">Close</button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="blank-note"></div>
+                </ul>
+            
+        </section>
+    </div>
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+        // Adjust textarea height to fit content
+        function adjustTextareaHeight(textarea) {
+            textarea.style.height = "auto"; // Reset height
+            textarea.style.height = `${textarea.scrollHeight}px`; // Set height to scroll height
+        }
+
+        // Handle Edit functionality
+        document.querySelectorAll(".edit-button").forEach((button) => {
+            button.addEventListener("click", () => {
+                const index = button.getAttribute("data-index");
+                const container = button.parentElement.parentElement;
+                const form = container.querySelector(".edit-form");
+                const noteText = document.querySelector(`.note-text[data-index="${index}"]`);
+                const textarea = form.querySelector("textarea");
+
+                // Toggle visibility
+                button.classList.add("hidden"); // Hide Edit button
+                form.classList.remove("hidden"); // Show form
+                noteText.classList.add("hidden"); // Hide the note text
+
+                adjustTextareaHeight(textarea);
+            });
+        });
+
+        // Handle Close button for Edit forms
+        document.querySelectorAll(".close-button").forEach((button) => {
+            button.addEventListener("click", () => {
+                const form = button.closest(".edit-form");
+                const container = form.parentElement;
+                const editButton = container.querySelector(".edit-button");
+                const index = editButton.getAttribute("data-index");
+                const noteText = document.querySelector(`.note-text[data-index="${index}"]`);
+
+                // Toggle visibility
+                form.classList.add("hidden"); // Hide form
+                editButton.classList.remove("hidden"); // Show Edit button
+                noteText.classList.remove("hidden"); // Show the note text
+            });
+        });
+
+        // Handle Add Note functionality
+        const addNoteButton = document.getElementById("add-note-button");
+        const addForm = document.querySelector(".add-form");
+        const closeAddFormButton = document.getElementById("close-add-form");
+
+        addNoteButton.addEventListener("click", () => {
+            addNoteButton.classList.add("hidden"); // Hide Add Note button
+            addForm.classList.remove("hidden"); // Show Add Note form
+        });
+
+        closeAddFormButton.addEventListener("click", () => {
+            addForm.classList.add("hidden"); // Hide Add Note form
+            addNoteButton.classList.remove("hidden"); // Show Add Note button
+        });
+
+        // Automatically adjust height of any textarea input
+        document.querySelectorAll("textarea").forEach((textarea) => {
+            textarea.addEventListener("input", () => adjustTextareaHeight(textarea));
+        });
+    });
+    </script>
+    <script src="/js/scripts.js"></script>
+</body>
+</html>

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <div id="loading-message" class="loading-message">
+        <div class="window">
+        <h2 class="dark-text"></h2>
+        </div>
+    </div>
+    <div id="window" class="window auth window-anim">
+        <h1>Sign In</h1>
+
+        <% if (errorMessage) { %>
+            <p class="error"><%= errorMessage %></p>
+        <% } %>
+
+        <form id="signin-form" action="/auth/signin" method="POST">
+            <div class="auth-container">
+                <div>
+                    <label for="email">Email:</label><br>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div>
+                    <label for="password">Password:</label><br>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <button type="submit">Sign In</button>
+            </div>
+        </form>
+
+        <br><hr><br>
+
+        <form action="/auth/signup" method="GET">
+            <div class="auth-other-option">
+                <p>Don't have an account yet? Then Sign Up!</p>
+                <button type="submit">Sign Up</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById("signin-form").addEventListener("submit", function (e) {
+            const form = this;
+            const loadingMessage = document.getElementById("loading-message");
+
+            const button = form.querySelector("button");
+            loadingMessage.style.display = "flex";
+            button.disabled = true; 
+
+            document.getElementById("window").classList.remove("window-anim");
+            document.getElementById("window").classList.add("fade-out");
+
+            setTimeout(function() {
+                form.submit(); 
+            }, 1000);  
+        });
+    </script>
+</body>
+</html>

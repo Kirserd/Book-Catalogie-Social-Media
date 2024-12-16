@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Search</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <div class="search-page-container">
+    <section id="back-section" class="window window-anim" style="grid-area: b;">
+        <form method="GET" action="/dashboard">
+            <button type="submit">To Dashboard</button>
+        </form>
+    </section>
+    <section id="pagination-section" class="window window-anim" style="grid-area: n;">
+        <% if (books && books.length > 0) { %>
+            <div class="pagination">
+                <% if (page > 1) { %>
+                    <a href="/search?query=<%= query %>&page=<%= page - 1 %>&sortBy=<%= sortBy %>">Previous</a>
+                <% } %>
+            
+                <span>Page <%= page %> of <%= totalPages %></span>
+            
+                <% if (page < totalPages) { %>
+                    <a href="/search?query=<%= query %>&page=<%= page + 1 %>&sortBy=<%= sortBy %>">Next</a>
+                <% } %>
+            </div>
+        <% } %>
+    </section>
+    <section id="search-section" class="window window-anim" style="grid-area: a;">
+        <h2 class="dark-text">Explore Books</h2>
+        <form method="GET" action="/search">
+            <div class="explore">
+                <input type="text" name="query" placeholder="Search books">
+                <select name="sortBy">
+                    <option value="intitle" selected >By title</option>
+                    <option value="inauthor" >By author</option>
+                    <option value="inpublisher" >By publisher</option>
+                </select>
+                <button type="submit">Search</button>
+            </div>
+        </form>
+    </section>
+    <section id="results-section" class="window window-anim" style="grid-area: c;">
+        <div class="gradient"></div>
+        <h2 class="dark-text">Results</h2>
+        <% if (books && books.length > 0) { %>
+            <div class="book-list recent-books">
+                <% books.forEach(function(book) { %>
+                    <a class="book" href="/book/<%= book.id %>">
+                        <div class="cover-container">
+                            <img class="book-cover" 
+                            src="<%= book.cover %>" 
+                            alt="<%= book.title %>" />
+                            <div class="gradient"></div>
+                            <div class="title-container">
+                                <div class="title">
+                                    <h3><%= book.title %></h3>
+                                </div>
+                            </div>  
+                        </div> 
+                        <hr />
+                        <div class="desc-container">
+                            <p class="left"><strong>Author(s)</strong></p>
+                            <p class="right"><%= book.author %></p>
+                        </div>
+                        <div class="desc-container">
+                            <p class="left"><strong>Genre(s)</strong></p>
+                            <p class="right genre"><%= book.genre %></p>
+                        </div>
+                        <div class="desc-container">
+                            <p class="left"><strong>Published</strong></p>
+                            <p class="right"><%= book.publishedYear %></p>
+                        </div>
+                        <div class="desc-container">
+                            <p class="left"><strong>Rating</strong></p>
+                            <p class="right"><%= book.rating %></p>
+                        </div>
+                    </a>
+                <% }); %>
+            </div>
+        <% } else { %>
+            <p>No books saved yet. Start adding some books!</p>
+        <% } %>
+    </section>
+    <section id="second-pagination-section" class="window window-anim" style="grid-area: d;">
+        <% if (books && books.length > 0) { %>
+            <div class="pagination">
+                <% if (page > 1) { %>
+                    <a href="/search?query=<%= query %>&page=<%= page - 1 %>&sortBy=<%= sortBy %>">Previous</a>
+                <% } %>
+            
+                <span>Page <%= page %> of <%= totalPages %></span>
+            
+                <% if (page < totalPages) { %>
+                    <a href="/search?query=<%= query %>&page=<%= page + 1 %>&sortBy=<%= sortBy %>">Next</a>
+                <% } %>
+            </div>
+        <% } %>
+    </section>
+  </div>
+  <script src="/js/scripts.js"></script>
+</body>
+</html>

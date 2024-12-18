@@ -81,7 +81,7 @@ h2{
   font-weight: 600;
 }
 h3 {
-  color: var(--t-0);
+  color: var(--t-1);
   font-size: 1.1em;
   margin: 10px 0;
   font-weight: 500;
@@ -1102,6 +1102,130 @@ button:active{
 /*#endregion */
 
 /* ===================================================================================================================================================================================== */
+
+/*#region SETTINGS */
+/*====================================================================*/
+
+.input-color{
+  height: 3rem;
+  width: 3rem;
+  border-radius: 0.3rem;
+  padding: 0 0.125rem;
+  margin-left: auto;
+}
+
+.settings-pack{
+  padding: 1rem;
+  padding-bottom: 1.5rem;
+}
+.settings-entries{
+  margin-top: 1rem;
+}
+
+.settings-entry .icon-btn-img{
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.settings-entry{
+  margin-left: 1rem;
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.25rem;
+  background: linear-gradient(to right, var(--b-2) 0%, var(--b-1) 20%, var(--b-1) 80%, var(--b-2) 100%);
+}
+
+.settings-entry p{
+  color: var(--t-2);
+}
+
+.settings-entry-subs{
+  margin-left: 1rem;
+}
+.settings-entry-subs>p{
+  margin-top: 1rem;
+  color:var(--t-1);
+}
+
+.settings-entry.sub{
+  margin-left: 1rem;
+}
+
+.settings-entry>.right{
+  align-content: center;
+}
+
+.slider {
+  margin: 1rem -0.25rem;
+  -webkit-appearance: none;
+  width: 100%;
+  height: 0.5rem;
+  border-radius: 1rem;  
+  background-color: var(--b-2);
+  border: solid var(--o-1) 0.125rem;
+  outline: none;
+  -webkit-transition: .2s;
+  transition: opacity .2s;
+  padding: 0;
+}
+
+.slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 1rem;
+  height: 1rem;
+  border: solid var(--t-1) 0.125rem;
+  border-radius: 50%; 
+  background: var(--t-1);
+  cursor: pointer;
+}
+
+.slider::-moz-range-thumb {
+  appearance: none;
+  width: 1rem;
+  height: 1rem;
+  border: solid var(--t-1) 0.125rem;
+  border-radius: 50%; 
+  background: var(--t-1);
+  cursor: pointer;
+}
+
+.toggle {
+  margin: 1rem 0.25rem;
+  -webkit-appearance: none;
+  width: 2.25rem;
+  height: 1rem;
+  border-radius: 1rem;  
+  background-color: var(--b-2);
+  border: solid var(--o-1) 0.125rem;
+  outline: none;
+  -webkit-transition: .2s;
+  transition: opacity .2s;
+  padding: 0;
+}
+
+.toggle::-webkit-slider-thumb {
+  appearance: none;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%; 
+  background: var(--t-1);
+  cursor: pointer;
+}
+
+.toggle::-moz-range-thumb {
+  appearance: none;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%; 
+  background: var(--t-1);
+  cursor: pointer;
+}
+
+/*====================================================================*/
+/*#endregion */
+
+/* ===================================================================================================================================================================================== */
+
 
 /*#region MEDIA */
 /*====================================================================*/

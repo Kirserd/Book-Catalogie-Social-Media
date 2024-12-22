@@ -71,7 +71,7 @@ body {
   overflow: hidden;
 }
 hr{
-  border-color: var(--o-0);
+  border: solid 0.015rem var(--o-1);
 }
 
 h1{
@@ -314,7 +314,7 @@ button:active{
 /*#region MAIN > DASHBOARD */
 /*====================================================================*/
 
-.container{
+#Dashboard{
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   grid-template-rows: 18vh 18vh 54.5vh;
@@ -1050,6 +1050,35 @@ button:active{
 /*#region PROFILE */
 /*====================================================================*/
 
+.profile-pic-img{
+  object-fit: cover;
+}
+
+.profile-window{
+  position: relative;
+}
+
+.banner{
+  background-color: var(--b-0);
+  position: absolute;
+  top: 0%;
+  right: 0%;
+  left: 0%;
+  bottom: calc(100% - 8.5rem);
+  border-radius: 1rem;
+  z-index: 1;
+}
+
+.profile-layer{
+  padding: 1rem;
+  position: absolute;
+  top: 0%;
+  right: 0%;
+  left: 0%;
+  bottom: 0%;
+  z-index: 2;
+}
+
 .profile-pic{
   margin-top:1.5rem;
   width:100%;
@@ -1225,7 +1254,6 @@ button:active{
 /*#endregion */
 
 /* ===================================================================================================================================================================================== */
-
 
 /*#region MEDIA */
 /*====================================================================*/

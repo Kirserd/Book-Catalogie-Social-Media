@@ -54,49 +54,49 @@ export async function setState(state) {
 function showOverview() {
     container.insertAdjacentHTML('beforeend', 
     `<div class="window window-anim" style="grid-area: d;" id="friend-management-new">
-    <h2 class="dark-text">Social</h2>
-    <div class="socials-container area-friends">
-        <div class="socials-search window">
-            <div id="socials-search-btn" class="socials-btn search-bar">
-                <input id="friend-search" type="text" placeholder="Search people..." />
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960">
-                    <path d="M382.12-330.5q-102.19 0-173.86-71.67-71.67-71.68-71.67-173.83t71.67-173.83q71.67-71.67 173.83-71.67 102.15 0 173.82 71.67 71.68 71.68 71.68 173.86 0 40.86-12.02 76.3-12.03 35.43-33.07 64.95l212.09 212.33q12.67 12.91 12.67 28.94 0 16.04-12.91 28.71-12.68 12.67-29.33 12.67t-29.32-12.67L523.85-375.59q-29.76 21.05-65.44 33.07-35.67 12.02-76.29 12.02Zm-.03-83q67.84 0 115.17-47.33 47.33-47.32 47.33-115.17t-47.33-115.17q-47.33-47.33-115.17-47.33-67.85 0-115.18 47.33-47.32 47.32-47.32 115.17t47.32 115.17q47.33 47.33 115.18 47.33Z"/>
-                </svg>
-            </div>   
-            <div class="hidden">  
-                <!-- Search Results -->
-                <div class="search-results" id="search-results">
-                    <p class="dark-text">Search for users to add as
-                        friends or manage requests.</p>
-                </div>
-            </div>
-        </div>
-        <div class="socials-requests window">
-            <button id="socials-requests-btn" class="socials-btn">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="-2 -2 21 21">
-                    <path d="M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2m.995-14.901a1 1 0 1 0-1.99 0A5 5 0 0 0 3 6c0 1.098-.5 6-2 7h14c-1.5-1-2-5.902-2-7 0-2.42-1.72-4.44-4.005-4.901"/>
-                </svg>
-                <p><strong> Requests </strong>(<span id="request-count">0</span>)</p>
-            </button>
-            <div class="hidden">
-                <!-- Friend Requests Notification -->
-                <div class="friend-requests">
-                    <div id="request-list">
-                        <!-- Dynamic list of incoming friend requests -->
+        <h2 class="dark-text">Social</h2>
+        <div class="socials-container area-friends">
+            <div class="socials-search window">
+                <div id="socials-search-btn" class="socials-btn search-bar">
+                    <input id="friend-search" type="text" placeholder="Search people..." />
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960">
+                        <path d="M382.12-330.5q-102.19 0-173.86-71.67-71.67-71.68-71.67-173.83t71.67-173.83q71.67-71.67 173.83-71.67 102.15 0 173.82 71.67 71.68 71.68 71.68 173.86 0 40.86-12.02 76.3-12.03 35.43-33.07 64.95l212.09 212.33q12.67 12.91 12.67 28.94 0 16.04-12.91 28.71-12.68 12.67-29.33 12.67t-29.32-12.67L523.85-375.59q-29.76 21.05-65.44 33.07-35.67 12.02-76.29 12.02Zm-.03-83q67.84 0 115.17-47.33 47.33-47.32 47.33-115.17t-47.33-115.17q-47.33-47.33-115.17-47.33-67.85 0-115.18 47.33-47.32 47.32-47.32 115.17t47.32 115.17q47.33 47.33 115.18 47.33Z"/>
+                    </svg>
+                </div>   
+                <div class="hidden">  
+                    <!-- Search Results -->
+                    <div class="search-results" id="search-results">
+                        <p class="dark-text">Search for users to add as
+                            friends or manage requests.</p>
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="socials-friends expanded window">
-            <button id="socials-friends-btn" class="socials-btn">
-                <p><strong>Friend List</strong></p>
-            </button>
-            <div>
-                <div class="friends">
+            <div class="socials-requests window">
+                <button id="socials-requests-btn" class="socials-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="-2 -2 21 21">
+                        <path d="M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2m.995-14.901a1 1 0 1 0-1.99 0A5 5 0 0 0 3 6c0 1.098-.5 6-2 7h14c-1.5-1-2-5.902-2-7 0-2.42-1.72-4.44-4.005-4.901"/>
+                    </svg>
+                    <p><strong> Requests </strong>(<span id="request-count">0</span>)</p>
+                </button>
+                <div class="hidden">
+                    <!-- Friend Requests Notification -->
+                    <div class="friend-requests">
+                        <div id="request-list">
+                            <!-- Dynamic list of incoming friend requests -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="socials-friends expanded window">
+                <button id="socials-friends-btn" class="socials-btn">
+                    <p><strong>Friend List</strong></p>
+                </button>
+                <div>
+                    <div class="friends">
+                </div>
             </div>
         </div>
-    </div>
-</div>`);
+    </div>`);
 }
 
 function showMessenger() {
@@ -640,7 +640,8 @@ function stateMessenger() {
 }
 
 //================================================================================================
-// INIT
+// EXPORT FUNCTIONS
 //================================================================================================
 
-setState('Overview');
+
+    setState('Overview');

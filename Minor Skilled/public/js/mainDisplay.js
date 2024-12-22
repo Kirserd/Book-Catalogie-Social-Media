@@ -110,7 +110,6 @@ function showDashboard() {
         `);
     }
 }
-
 function showSettings() {
     container.insertAdjacentHTML('beforeend', ` 
         <div class="window window-anim settings-container" style="grid-area: c;" id="main-management-new">
@@ -193,7 +192,7 @@ let currentTheme = { // >> FALLBACK VANILLA DARK
     a: '#916d4c',
     contrast: 20,
     moreAccents: 0 
-  } 
+} 
 
 const settingsButton = document.getElementById('settings-btn');
 const homeButton = document.getElementById('home-btn');
@@ -224,10 +223,70 @@ function stateDashboard() {
 
     // FUNCTIONS -------------------------------------------------------------------------------------
 
-    function onStart() {
+    function createGenreBubbles() {
+        document.querySelectorAll(".desc-container .right.genre").forEach((genreElement) => {
+            const genresText = genreElement.textContent.trim(); 
+            const genresArray = genresText.split(","); 
+            
+            const uniqueGenres = new Set();
     
-    };
+            genresArray.forEach((genre) => {
+                const shortGenre = genre.split("/")[0].trim(); 
+                uniqueGenres.add(shortGenre); 
+            });
+    
+            genreElement.textContent = "";
+    
+            const wrapper = document.createElement("div");
+            wrapper.classList.add("genre-wrapper");
+            genreElement.appendChild(wrapper);
+    
+            const maxWrapperHeight = parseFloat(
+                getComputedStyle(wrapper).getPropertyValue("max-height")
+            );
+    
+            let totalHeight = 0;
+            let isTruncated = false;
+    
+            Array.from(uniqueGenres).forEach((shortGenre) => {
+                if (isTruncated) return; 
+    
+                const bubble = document.createElement("p");
+                bubble.classList.add("genre-bubble");
+                bubble.textContent = shortGenre;
+                wrapper.appendChild(bubble); 
+    
+                const currentHeight = wrapper.scrollHeight;
+    
+                if (currentHeight > maxWrapperHeight) {
+                    wrapper.removeChild(bubble);
+                    const ellipsisBubble = document.createElement("p");
+                    ellipsisBubble.classList.add("genre-bubble", "ellipsis-bubble");
+                    ellipsisBubble.textContent = "...";
+                    wrapper.appendChild(ellipsisBubble);
+                    isTruncated = true;
+                }
+            });
+        });
+    }
+    function truncateEmail(email) {
+        if (email) {
+            return email.split('@')[0]; 
+        }
+        return '';
+    }
+    function truncateEmails(){
+        const emailElement = document.querySelector('.accent-text');
+        const fullEmail = emailElement?.textContent.trim(); 
+        if (fullEmail) {
+            emailElement.textContent = truncateEmail(fullEmail); 
+        }
+    }
 
+    function onStart() {
+        truncateEmails();
+        createGenreBubbles();
+    };
 
     // EVENTS -------------------------------------------------------------------------------------
 
@@ -275,7 +334,8 @@ function stateSettings() {
 }
 
 //================================================================================================
-// INIT
+// EXPORT FUNCTIONS
 //================================================================================================
 
-setState('Dashboard');
+
+    setState('Dashboard');

@@ -1,7 +1,7 @@
 
 // VARIABLES -------------------------------------------------------------------------------------
 
-let currentThemeStyle = document.createElement('style');
+let currentThemeStyle;
 
 const vanilla_dark = {
   c1: '#070707', 
@@ -10,7 +10,6 @@ const vanilla_dark = {
   contrast: 20,
   moreAccents: 0
 } 
-
 const lowContrast = {
   "--s-0": 4.0,
   "--s-1": 6.92,
@@ -25,12 +24,12 @@ const lowContrast = {
   "--b-2h": 30.0,
   "--b-3h": 39.23,
   "--b-4h": 46.15,
-  "--o-0": 39.23,
-  "--o-1": 46.15,
-  "--o-2": 51.98,
-  "--a-0": 100.61,
+  "--o-0": 30.0,
+  "--o-1": 39.23,
+  "--o-2": 46.15,
+  "--a-0": 100,
   "--a-0a": 79.85,
-  "--t-0": 109.85,
+  "--t-0": 100,
   "--t-1": 96.0,
   "--t-2": 72.92,
   "--t-3": 47.52
@@ -77,7 +76,6 @@ function interpolateColor(color1, color2, factor) {
   
     return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
 }
-  
 function darkenColor(color, percent) {
   const factor = (100 - percent) / 100; // Convert percent to factor
   const r = Math.round(parseInt(color.slice(1, 3), 16) * factor);
@@ -86,7 +84,9 @@ function darkenColor(color, percent) {
 
   return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
 }
-  
+
+// EXPORT FUNCTIONS ------------------------------------------------------------------------------
+
 export function setTheme(color1, color2, accent, contrast, moreAccents) {
   
   contrast = contrast * 0.01;
@@ -140,5 +140,6 @@ export function setTheme(color1, color2, accent, contrast, moreAccents) {
   currentThemeStyle.innerHTML = theme;
 }
 
-document.head.appendChild(currentThemeStyle);
-setTheme(vanilla_dark.c1, vanilla_dark.c2, vanilla_dark.a, 20, 0);
+  currentThemeStyle = document.createElement('style');
+  document.head.appendChild(currentThemeStyle);
+  setTheme(vanilla_dark.c1, vanilla_dark.c2, vanilla_dark.a, 20, 0);

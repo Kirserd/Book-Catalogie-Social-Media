@@ -314,15 +314,6 @@ button:active{
 /*#region MAIN > DASHBOARD */
 /*====================================================================*/
 
-#Dashboard{
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: 18vh 18vh 54.5vh;
-  grid-template-areas: 
-  "a b b"
-  "a c c"
-  "d c c";
-}
 
 .recent-activity{
   padding-left: 0;

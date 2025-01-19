@@ -25,7 +25,7 @@ app.use(express.static('public'));
 app.use((req, res, next) => {
   const fileExtension = req.url.split('.').pop();
   const excludedExtensions = ['css', 'js', 'jpg', 'png', 'ico'];
-  const excludedURLs = ['/friends/getFriendList', '/friends/getFriendRequests'];
+  const excludedURLs = ['/friends', '/friends/requests'];
 
   if (excludedExtensions.includes(fileExtension) || excludedURLs.includes(req.url)) {
     return next();
@@ -45,7 +45,7 @@ app.use((req, res, next) => {
 app.use(express.json());
 app.use('/', bookRoutes);
 app.use('/', authRoutes);
-app.use('/friends/', friendRoutes);
+app.use('/', friendRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

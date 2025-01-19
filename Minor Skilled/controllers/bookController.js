@@ -1,144 +1,274 @@
 const axios = require('axios');
-const fs = require('fs');
-const path = require('path');
 const pool = require('../models/db');
 
 exports.searchBooks = async (req, res) => {
-  let { query, sortBy, page = 1 } = req.query; 
-  const maxResults = 40; 
-  page = parseInt(page);
-  const startIndex = (page - 1) * maxResults; 
-  const logFilePath = path.join(__dirname, '../logs/usage.log');
-  
-  const searchQuery = query ? (sortBy!='intitle'? `${query}`: `${query}+${sortBy || 'intitle'}` ): "UK";
+
+  //#region [VARIABLES]
+
+  const { query, sortBy, direction='DESC', page = 1 } = req.query;
+  const pageSize = 20;
+  const offset = (page - 1) * pageSize;
+
+  const sortRule = JSON.stringify([{"column": sortBy, "direction": direction}]);
+
+  //#endregion
+
+  //#region [LOCAL FUNCTIONS]
+
+  const parseSortConditions = (sortBy) => {
+    if (!sortBy) return null;
+    try {
+      const sortRules = JSON.parse(sortBy);
+      return sortRules.map((rule) => `${rule.column} ${rule.direction.toUpperCase()}`).join(", ");
+    } catch (error) {
+      console.error("Invalid sortBy format:", error);
+      return null;
+    }
+  };
+  const fetchBooksFromDatabase = async (query, sortConditions, pageSize, offset) => {
+    const dbQuery = `
+      SELECT book_id, title, author, publisher, published, country, rating, full_json
+      FROM books
+      WHERE LOWER(title) LIKE $1 OR LOWER(author) LIKE $1 OR LOWER(publisher) LIKE $1
+      ${sortConditions ? `ORDER BY ${sortConditions}` : ""}
+      LIMIT $2 OFFSET $3
+    `;
+    const dbResult = await pool.query(dbQuery, [`%${query?.toLowerCase() || ""}%`, pageSize, offset]);
+    return dbResult.rows;
+  };
+  const fetchBooksFromAPI = async (query, offset, remaining) => {
+    if (!query) return [];
+    const apiUrl = `https://www.googleapis.com/books/v1/volumes?q=${query}&startIndex=${offset}&maxResults=${remaining}`;
+    const response = await axios.get(apiUrl);
+    return response.data.items.map((book) => ({
+      book_id: book.id,
+      title: book.volumeInfo.title || "Unknown",
+      author: book.volumeInfo.authors?.[0] || "Unknown",
+      publisher: book.volumeInfo.publisher || "Unknown",
+      published: book.volumeInfo.publishedDate ? new Date(book.volumeInfo.publishedDate) : null,
+      country: response.data.country || "Unknown",
+      rating: book.volumeInfo.averageRating || null,
+      full_json: book
+    }));
+  };
+  const insertBooksIntoDatabase = async (books) => {
+    const insertPromises = books.map((book) =>
+      pool.query(
+        `
+        INSERT INTO books (book_id, title, author, publisher, published, country, rating, full_json)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        ON CONFLICT (book_id) DO NOTHING
+      `,
+        [book.book_id, book.title, book.author, book.publisher, book.published, book.country, book.rating, book.full_json]
+      )
+    );
+    await Promise.all(insertPromises);
+  };
+
+  //#endregion
+
+  //#region [EXECUTION]
 
   try {
-    const response = await axios.get(`https://www.googleapis.com/books/v1/volumes?q=${searchQuery}&maxResults=${maxResults}&startIndex=${startIndex}`);
-    
-    const books = response.data.items.map(book => ({
-      id: book.id,
-      title: book.volumeInfo.title,
-      cover: book.volumeInfo.imageLinks ? book.volumeInfo.imageLinks.thumbnail : '',
-      author: book.volumeInfo.authors ? book.volumeInfo.authors[0] : 'Unknown',
-      publishedYear: book.volumeInfo.publishedDate || 'N/A',
-      genre: book.volumeInfo.categories ? book.volumeInfo.categories[0] : 'Unknown',
-      rating: book.volumeInfo.averageRating || 'No rating',
-    }));
+    const sortConditions = parseSortConditions(sortRule);
+    const dbBooks = await fetchBooksFromDatabase(query, sortConditions, pageSize, offset);
 
-    const totalResults = response.data.totalItems;
-    const totalPages = Math.ceil(totalResults / maxResults);
+    const remaining = pageSize - dbBooks.length;
+    let apiBooks = [];
+    if (remaining > 0) {
+      apiBooks = await fetchBooksFromAPI(query, offset, remaining);
+      await insertBooksIntoDatabase(apiBooks);
+    }
 
-    const logMessage = `[${new Date().toISOString()}] SEARCH QUERY: "${query || 'All books'}" - Page: ${page} - Results: ${books.length}\n`;
-    fs.appendFile(logFilePath, logMessage, (err) => {
-      if (err) console.error("Failed to write log:", err);
+    const combinedBooks = [...dbBooks, ...apiBooks];
+    res.json({
+      books: combinedBooks,
+      page,
+      pageSize,
+      query,
+      totalResults: dbBooks.length + apiBooks.length
     });
-
-    return res.render('search', { books, error: null, page: page, totalPages: totalPages, query: query || '', sortBy: sortBy || 'intitle' });
   } catch (error) {
-    const logMessage = `[${new Date().toISOString()}] SEARCH QUERY: "${query || 'All books'}" - Error: Failed to fetch books\n`;
-    fs.appendFile(logFilePath, logMessage, (err) => {
-      if (err) console.error("Failed to write log:", err);
-    });
-
-    return res.render('search', { books: null, error: "Failed to fetch books", page: 1, totalPages: 1, query: query || '', sortBy: sortBy || 'intitle' });
+    console.error("Error fetching books:", error);
+    res.status(500).json({ error: "Failed to fetch books" });
   }
+
+  //#endregion
+
 };
 
-exports.getBookDetails = async (req, res) => {
-  if (!req.session.userId) {
-      return res.redirect('/auth');
-  }
 
+exports.getBookDetails = async (req, res) => {
   const { id } = req.params;
 
   try {
-      const response = await axios.get(`https://www.googleapis.com/books/v1/volumes/${id}`);
-      const book = response.data.volumeInfo;
-
-      const saved = await checkIfBookSaved(req.session.userId, id);
-      const bookDetails = {
-          id: id,
-          title: book.title,
-          cover: book.imageLinks ? book.imageLinks.thumbnail : '',
-          author: book.authors ? book.authors.join(', ') : 'Unknown',
-          publishedYear: book.publishedDate || 'N/A',
-          genre: book.categories ? book.categories.join(', ') : 'Unknown',
-          rating: book.averageRating || 'No rating',
-          description: book.description || 'No description available',
-          pageCount: book.pageCount || 'N/A',
-          publisher: book.publisher || 'Unknown',
-          saved: saved,
-      };
-
-      const notesQuery = `
-          SELECT id, note
-          FROM user_notes
-          WHERE user_id = $1 AND book_id = $2
+      const query = `
+          SELECT title, author, publisher, published, country, rating, full_json
+          FROM books
+          WHERE book_id = $1
       `;
-      const notesResult = await pool.query(notesQuery, [req.session.userId, id]);
-      const notes = notesResult.rows;
+      const result = await pool.query(query, [id]);
 
-      res.render('bookDetails', { book: bookDetails, notes: notes, previousPage: req.get('Referer') });
+      if (result.rowCount === 0) {
+          return res.status(404).json({ success: false, message: 'Book not found' });
+      }
+
+      res.status(200).json({ success: true, book: result.rows[0] });
   } catch (error) {
       console.error('Error fetching book details:', error);
-      res.render('bookDetails', { book: null, notes: [], previousPage: req.get('Referer'), error: 'Failed to fetch book details' });
+      res.status(500).json({ success: false, message: 'Failed to fetch book details' });
   }
 };
 
-const checkIfBookSaved = async (userId, googleBooksId) => {
+exports.getBookRating = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+      const query = `
+          SELECT AVG(rating) AS average_rating
+          FROM book_ratings
+          WHERE book_id = $1
+      `;
+      const result = await pool.query(query, [id]);
+
+      if (result.rowCount === 0 || result.rows[0].average_rating === null) {
+          return res.status(200).json({ success: true, average_rating: null, message: 'No ratings available' });
+      }
+
+      res.status(200).json({ success: true, average_rating: result.rows[0].average_rating });
+  } catch (error) {
+      console.error('Error fetching book rating:', error);
+      res.status(500).json({ success: false, message: 'Failed to fetch book rating' });
+  }
+};
+
+
+exports.isBookSaved = async (req, res) => {
+  const { id } = req.params; 
+  const userId = req.session.userId; 
+
   const query = `
-    SELECT * FROM user_books
-    WHERE user_id = $1 AND google_books_id = $2
+    SELECT 1
+    FROM user_collections
+    WHERE user_id = $1 AND $2 = ANY(books);
   `;
-  const result = await pool.query(query, [userId, googleBooksId]);
-  return result.rows.length > 0; 
+
+  try {
+    const result = await pool.query(query, [userId, id]);
+    const isSaved = result.rows.length > 0;
+
+    res.json({ isBookSaved: isSaved });
+  } catch (error) {
+    console.error('Error checking if book is saved:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
 };
 
 exports.saveBookToUser = async (req, res) => {
-  if (!req.session.userId) {
-    return res.redirect('/auth'); 
-  }
-
-  const { google_books_id } = req.body; 
+  const { id } = req.params;
+  const userId = req.session.userId;
 
   try {
-    const addedAt = new Date();
+      // Check if the user already has a collection
+      const queryCheck = `SELECT books FROM user_collections WHERE user_id = $1`;
+      const result = await pool.query(queryCheck, [userId]);
 
-    const query = `
-      INSERT INTO user_books (user_id, added_at, google_books_id)
-      VALUES ($1, $2, $3)
-    `;
-    await pool.query(query, [
-      req.session.userId, 
-      addedAt,
-      google_books_id
-    ]);
+      if (result.rows.length === 0) {
+          const queryInsert = `
+              INSERT INTO user_collections (user_id, books)
+              VALUES ($1, ARRAY[$2])
+          `;
+          await pool.query(queryInsert, [userId, id]);
+      } else {
+          const books = result.rows[0].books;
+          if (!books.includes(id)) {
+              const queryUpdate = `
+                  UPDATE user_collections
+                  SET books = array_append(books, $2)
+                  WHERE user_id = $1
+              `;
+              await pool.query(queryUpdate, [userId, id]);
+          }
+      }
 
-    return res.redirect(`/book/${google_books_id}`);
+      res.status(200).json({ message: 'Book saved to collection.' });
   } catch (error) {
-    console.error('Error saving book to user_books:', error);
-    return res.redirect(`/book/${google_books_id}`);
+      console.error('Error saving book to user collection:', error);
+      res.status(500).json({ error: 'Failed to save book to collection.' });
   }
 };
 
 exports.removeBookFromUser = async (req, res) => {
-  if (!req.session.userId) {
-    return res.redirect('/auth'); 
-  }
+  const { id } = req.params; 
+  const userId = req.session.userId; 
 
-  const { google_books_id } = req.body; 
-  console.error('google_books_id:',req.session.userId);
-try {
-  const query = `
-    DELETE FROM user_books
-    WHERE user_id = $1 AND google_books_id = $2
-    RETURNING id;
-  `;
-  await pool.query(query, [req.session.userId, google_books_id]);
+  try {
+      const queryCheck = `SELECT books FROM user_collections WHERE user_id = $1`;
+      const result = await pool.query(queryCheck, [userId]);
 
-    return res.redirect(`/book/${google_books_id}`);
+      if (result.rows.length === 0 || !result.rows[0].books.includes(id)) {
+          return res.status(400).json({ error: 'Book not found in user collection.' });
+      }
+
+      const queryUpdate = `
+          UPDATE user_collections
+          SET books = array_remove(books, $2)
+          WHERE user_id = $1
+      `;
+      await pool.query(queryUpdate, [userId, id]);
+
+      res.status(200).json({ message: 'Book removed from collection.' });
   } catch (error) {
-    console.error('Error removing book from user_books:', error);
-    return res.redirect(`/book/${google_books_id}`);
+      console.error('Error removing book from user collection:', error);
+      res.status(500).json({ error: 'Failed to remove book from collection.' });
   }
 };
+
+exports.getUsersBookCollection = async (req, res) => {
+    //#region [VARIABLES]
+
+    if (!req.session.userId) {
+      return res.redirect('/auth');
+    }
+
+    //#endregion
+
+    //#region [LOCAL FUNCTIONS]
+
+    const fetchUserBooks = async (userId) => {
+        const query = `
+        SELECT unnest(books) AS book_id
+        FROM user_collections
+        WHERE user_id = $1;
+        `;
+        const result = await pool.query(query, [userId]);
+        return result.rows.map((row) => row.book_id);
+    };
+
+    const fetchBookDetails = async (bookId) => {
+        const query = 'SELECT * FROM books WHERE book_id = $1';
+        const result = await pool.query(query, [bookId]);
+        if (result.rows.length > 0) {
+            return result.rows[0];
+        }
+        return null;
+    };
+
+    //#endregion
+
+    //#region [EXECUTION]
+
+    try {
+      const bookIds = await fetchUserBooks(req.session.userId);
+      const booksPromises = bookIds.map(fetchBookDetails);
+      const books = (await Promise.all(booksPromises)).filter(Boolean);
+
+      res.status(200).json({ books: books });
+    } catch (error) {
+      console.error('Error fetching user collection:', error);
+      res.status(500).json({ error: 'Failed to fetch books from collection.' });
+    }
+
+    //#endregion
+
+};  

@@ -212,8 +212,6 @@ export default class MORPh {
         this.dataBridge = {};
     }
 
-//#endregion
-
     //#endregion
 
     //#region =============[ PRIVATE METHODS ]=====================
@@ -254,6 +252,7 @@ export default class MORPh {
         component.orchestrator = this;
         component.grid = grid;
         component.wrapper = wrapper;
+        wrapper.classList = component.wrapperClassList;
         
         animated.classList.add('MORPh-fade-in');
         setTimeout(() => { 

@@ -105,9 +105,9 @@ export default class MessengerComponent extends Component {
     async _fetchMessages(scrollToBottom = false) {
         try {
             const messagesID = this.orchestrator.getData('messagesID');
-            const url = `/friends/getMessages?friend_id=${messagesID}`;
+            const url = `/friends/${messagesID}/messages`;
             
-            const result = await this.constructor.fetchJSON(url, { method: "GET" });
+            const result = await this.constructor.fetchJSON(url, { methoD: "GET" });
             const newMessages = result.messages;
     
             if (JSON.stringify(newMessages) !== JSON.stringify(this.orchestrator.getData('messages'))) {
@@ -134,8 +134,9 @@ export default class MessengerComponent extends Component {
         }
     
         try {
-            const url = `/friends/addMessage`;
-            const body = { friend_id: this.orchestrator.getData('messagesID'), content };
+            const messagesID = this.orchestrator.getData('messagesID');
+            const url = `/friends/${messagesID}/messages`;
+            const body = {content };
             
             await this.constructor.fetchJSON(url, {
                 method: "POST",
@@ -163,9 +164,9 @@ export default class MessengerComponent extends Component {
     static message(message, messagesID){
         return `
                 <div class="message ${(message.sender_id == messagesID) ? 'left' : 'right'}">
-                    <span class="email">${Utils.truncateEmail(message.email)}</span> 
+                    <span class="email">${message.sender_nickname}</span> 
                     <span class="content">${message.content}</span>
-                    <span class="timestamp">${Utils.convertTimestamp(message.timestamp)}</span>
+                    <span class="timestamp">${message.timestamp}</span>
                 </div>
         `;
     }

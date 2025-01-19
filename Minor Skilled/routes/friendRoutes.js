@@ -2,24 +2,24 @@ const express = require('express');
 const friendController = require('../controllers/friendController');
 const router = express.Router();
 
-// Add and remove friends
-router.post('/addFriend', friendController.addFriend);
-router.post('/removeFriend', friendController.removeFriend);
+router.post('/friends/:friend_id', ); //...
+router.delete('/friends/:friend_id', friendController.removeFriend); // Remove a friend
 
-// Send and manage friend requests
-router.post('/request', friendController.sendFriendRequest);
-router.post('/accept', friendController.acceptFriendRequest);
-router.post('/decline', friendController.declineFriendRequest);
-router.post('/cancel', friendController.cancelFriendRequest);
+// Friend Requests
+router.post('/friends/:friend_id/request', friendController.sendFriendRequest); // Send a friend request
+router.post('/friends/:friend_id/request/accept', friendController.acceptFriendRequest); // Accept a friend request
+router.post('/friends/:friend_id/request/decline', friendController.declineFriendRequest); // Decline a friend request
+router.post('/friends/:friend_id/request/cancel', friendController.cancelFriendRequest); // Cancel a sent friend request
 
-router.post('/addMessage', friendController.addMessage);
+// Messaging
+router.post('/friends/:friend_id/messages', friendController.addMessage); // Add a message to a friend
+router.get('/friends/:friend_id/messages', friendController.getMessages); // Get message history with a friend
 
-// Get information about friendships and requests
-router.get('/isFriend/:friend_id', friendController.isFriend);
-router.get('/getFriendList', friendController.getFriendList);
-router.get('/getFriendRequests', friendController.getFriendRequests);
-router.get('/search', friendController.searchUsersByEmail);
-router.get('/mutualFriends/:user_id', friendController.getMutualFriends);
-router.get('/getMessages', friendController.getMessages);
+// Queries
+router.get('/friends/:friend_id/status', friendController.getFriendStatus); // Check if a user is a friend
+router.get('/friends', friendController.getFriendList); // Get a list of friends
+router.get('/friends/requests', friendController.getFriendRequests); // Get a list of incoming friend requests
+router.get('/friends/mutual/:user_id', friendController.getMutualFriends); // Get mutual friends
+router.get('/friends/search', friendController.searchUsersByNickname); // Search users by email
 
 module.exports = router;

@@ -1,9 +1,10 @@
-import { Component, Utils, FeedComponent, SettingsComponent } from "../Package.js";
+import { Component, Utils, FeedComponent, SettingsComponent, ExploreComponent } from "../Package.js";
 
 export default class ProfileComponent extends Component {
     wrapperClassList = "window profile-window";
     
     homeButton = null;
+    exploreButton = null;
     settingsButton = null;
 
     render() {
@@ -47,25 +48,34 @@ export default class ProfileComponent extends Component {
     _subscribeButtons(){
         this._onHomeButtonClick = this._onHomeButtonClick.bind(this);
         this._onSettingsButtonClick = this._onSettingsButtonClick.bind(this);
+        this._onExploreButtonClick = this._onExploreButtonClick.bind(this);
 
         this.settingsButton = document.getElementById('settings-btn');
         this.homeButton = document.getElementById('home-btn');
+        this.exploreButton = document.getElementById('explore-btn');
 
         this.homeButton.addEventListener('click', this._onHomeButtonClick);
         this.settingsButton.addEventListener('click', this._onSettingsButtonClick);
+        this.exploreButton.addEventListener('click', this._onExploreButtonClick);
     }
 
     _unsubscribeButtons(){
         this.homeButton.removeEventListener('click', this._onHomeButtonClick);
         this.settingsButton.removeEventListener('click', this._onSettingsButtonClick);
+        this.exploreButton.removeEventListener('click', this._onExploreButtonClick);
 
         this.settingsButton = null;
         this.homeButton = null;
+        this.exploreButton = null;
     }
 
     _onHomeButtonClick() {
         if(!(this.orchestrator.components['c'].instance instanceof FeedComponent))
             this.orchestrator.addComponent('c', new FeedComponent({}), false);
+    }
+    _onExploreButtonClick() {
+        if(!(this.orchestrator.components['c'].instance instanceof ExploreComponent))
+            this.orchestrator.addComponent('c', new ExploreComponent({}), false);
     }
     _onSettingsButtonClick() {
         if(!(this.orchestrator.components['c'].instance instanceof SettingsComponent))
@@ -78,12 +88,14 @@ export default class ProfileComponent extends Component {
 
     static profilePic(){
         return `<div class="profile-pic">
+        <a href="/auth">
                     <button class="icon-btn hov-s6i hov-si blank-btn" id="logout-btn">
                         <svg class="icon-btn-img hov-i" xmlns="http://www.w3.org/2000/svg" viewBox="-1 1 15 15">
                             <path fill-rule="evenodd" d="M10 3.5a.5.5 0 0 0-.5-.5h-8a.5.5 0 0 0-.5.5v9a.5.5 0 0 0 .5.5h8a.5.5 0 0 0 .5-.5v-2a.5.5 0 0 1 1 0v2A1.5 1.5 0 0 1 9.5 14h-8A1.5 1.5 0 0 1 0 12.5v-9A1.5 1.5 0 0 1 1.5 2h8A1.5 1.5 0 0 1 11 3.5v2a.5.5 0 0 1-1 0z"/>
                             <path fill-rule="evenodd" d="M4.146 8.354a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H14.5a.5.5 0 0 1 0 1H5.707l2.147 2.146a.5.5 0 0 1-.708.708z"/>
                         </svg>
                     </button>
+                    </a>
                     <img class="profile-pic-img" src="assets/imgs/nopic.png" alt="Profile Picture" class="dark-text profile-picture">
                 </div>`;
     }

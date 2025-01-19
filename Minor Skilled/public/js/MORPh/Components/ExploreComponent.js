@@ -1,53 +1,54 @@
 import { Component, Utils, Pages} from "../Package.js";
 
-export default class FeedComponent extends Component {
+export default class ExploreComponent extends Component {
     wrapperClassList = "window recent-activity";
 
-    render() {      
+
+    render() {
+        const books = this.orchestrator?.getData('searchResults')?.books || [];
         this.inner = `
         <div class="inner-component" id="feed">
             <div class="gradient"></div>
-            <h2 class="dark-text">My Books</h2>
+            <h2 class="dark-text">Explore</h2>
             <div class="book-list recent-books">
+                ${ExploreComponent.bookList(books)}
             </div>
         </div>`;
 
         return this.inner;
     }
 
-    async updateRender(){
-        const userDataContainer = document.getElementById('user-data');
-        const user = JSON.parse(userDataContainer.getAttribute('data-user') || '[]');
-
-        const res = await fetch(`/${user.user_id}/books`);
-        const books = (await res.json()).books;
-
-        this.inner = `        
+    updateRender(){
+        const books = this.orchestrator?.getData('searchResults')?.books || [];
+        this.inner = `
         <div class="inner-component" id="feed">
             <div class="gradient"></div>
-            <h2 class="dark-text">My Books</h2>
+            <h2 class="dark-text">Explore</h2>
             <div class="book-list recent-books">
-                ${FeedComponent.bookList(books)}
+                ${ExploreComponent.bookList(books)}
             </div>
         </div>`;
 
-        this.wrapper.innerHTML = this.inner;
+        this.wrapper.innerHTML = this.inner;    
+        
+        Utils.defineGenreBubbles();
     }
 
     async onMount() {
         super.onMount();
-        await this.updateRender();
         this._subscribeEvents();
 
         Utils.defineGenreBubbles();
-        console.log(`Mounted: Feed`);
+        console.log(`Mounted: Explore`);
+
+        this.updateRender();
     }
 
     async onUnmount() {
         super.onUnmount();
         this._unsubscribeEvents();
 
-        console.log(`Unmounted: Feed`);  
+        console.log(`Unmounted: Explore`);  
     }
 
     //#region ============[ PRIVATE ]=================================
@@ -66,7 +67,7 @@ export default class FeedComponent extends Component {
             const bookId = possibleBook.dataset.bookId;
             if (bookId) {
                 this.orchestrator.setData("selectedBookID", bookId);
-                Pages.subPage = 'feed';
+                Pages.subPage = 'explore';
                 Pages.goPage('bookDetails', this.orchestrator);
             }
         }
@@ -76,16 +77,16 @@ export default class FeedComponent extends Component {
 
     //#region ============[ SUB-COMPONENTS ]==========================
 
-    static bookList(books){
+    static bookList(books) {
+
         if (books.length > 0) {
-            return books.map(book => FeedComponent.bookCard(book)).join('');
+            const result = books.map(book => ExploreComponent.bookCard(book)).join('');
+            return result;
         } else {
-            return `
-                <p>No books saved yet. Start adding some books!</p>
-            `;
+            return `<p>No books found :c</p>`;
         }
     }
-
+    
     static bookCard(book) {
         const { full_json } = book;
         const volumeInfo = full_json?.volumeInfo || {};
@@ -129,7 +130,6 @@ export default class FeedComponent extends Component {
                 <div class="gradient-accent"></div>
             </a>`;
     }
-
 
     //#endregion
 }

@@ -5,4 +5,5 @@ import {
 } from "./MORPh/Package.js";
 
 Themes.init();
-Pages.goPage('dashboard', new MORPh('morph-container'));
+const orchestrator = new MORPh('morph-container');
+Pages.goPage('dashboard', orchestrator);

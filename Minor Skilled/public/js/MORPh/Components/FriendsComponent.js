@@ -211,7 +211,7 @@ export default class FriendsComponent extends Component {
     async _fetchFriends() {
         const friendsContainer = document.querySelector(".friends");
 
-        const res = await fetch("/friends/getFriendList");
+        const res = await fetch("/friends");
         const friends = await res.json();
 
         if (JSON.stringify(friends) !== JSON.stringify(this.previousFriends)) {
@@ -219,14 +219,14 @@ export default class FriendsComponent extends Component {
             if (friends.length > 0) {
                 friendsContainer.innerHTML = friends.map(friend => `
                     <div class="friend-entry inner-window">
-                        <span>${Utils.truncateEmail(friend.email)}</span>
+                        <span>${friend.nickname}</span>
                         <div class="decision-btns">
-                            <button class="socials-entry-btn messenger-btn" data-id="${friend.id}">
+                            <button class="socials-entry-btn messenger-btn" data-id="${friend.user_id}">
                                 <svg class="socials-entry-img" xmlns="http://www.w3.org/2000/svg" viewBox="-1.8 -1.8 20 20">
                                     <path d="M0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.5a1 1 0 0 0-.8.4l-1.9 2.533a1 1 0 0 1-1.6 0L5.3 12.4a1 1 0 0 0-.8-.4H2a2 2 0 0 1-2-2zm3.5 1a.5.5 0 0 0 0 1h9a.5.5 0 0 0 0-1zm0 2.5a.5.5 0 0 0 0 1h9a.5.5 0 0 0 0-1zm0 2.5a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1z"/>
                                 </svg>
                             </button>
-                            <button class="socials-entry-btn friend-btn" data-id="${friend.id}" data-status="friend">
+                            <button class="socials-entry-btn friend-btn" data-id="${friend.user_id}" data-status="friend">
                                 <svg class="socials-entry-img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
                                     <path d="M12.5 16a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7M11 12h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1 0-1m0-7a3 3 0 1 1-6 0 3 3 0 0 1 6 0"/>
                                     <path d="M2 13c0 1 1 1 1 1h5.256A4.5 4.5 0 0 1 8 12.5a4.5 4.5 0 0 1 1.544-3.393Q8.844 9.002 8 9c-5 0-6 3-6 4"/>
@@ -244,7 +244,7 @@ export default class FriendsComponent extends Component {
         const requestList = document.getElementById("request-list");
         const requestCount = document.getElementById("request-count");
 
-        const res = await fetch("/friends/getFriendRequests");
+        const res = await fetch("/friends/requests");
         const requests = await res.json();
     
         if (JSON.stringify(requests) !== JSON.stringify(this.previousRequests)) {
@@ -253,15 +253,15 @@ export default class FriendsComponent extends Component {
             if (requests.length > 0) {
                 requestList.innerHTML = requests.map(request => `
                     <div class="request-entry inner-window">
-                        <span>${Utils.truncateEmail(request.email)}</span>
+                        <span>${request.nickname}</span>
                         <div class="decision-btns">
-                            <button class="accept-btn socials-entry-btn" data-id="${request.id}">
+                            <button class="accept-btn socials-entry-btn" data-id="${request.user_id}">
                                 <svg class="socials-entry-img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
                                     <path d="M12.5 16a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7m.5-5v1h1a.5.5 0 0 1 0 1h-1v1a.5.5 0 0 1-1 0v-1h-1a.5.5 0 0 1 0-1h1v-1a.5.5 0 0 1 1 0m-2-6a3 3 0 1 1-6 0 3 3 0 0 1 6 0"/>
                                     <path d="M2 13c0 1 1 1 1 1h5.256A4.5 4.5 0 0 1 8 12.5a4.5 4.5 0 0 1 1.544-3.393Q8.844 9.002 8 9c-5 0-6 3-6 4"/>
                                 </svg>
                             </button>
-                            <button class="decline-btn socials-entry-btn" data-id="${request.id}">
+                            <button class="decline-btn socials-entry-btn" data-id="${request.user_id}">
                                 <svg class="socials-entry-img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
                                     <path d="M12.5 16a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7M11 12h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1 0-1m0-7a3 3 0 1 1-6 0 3 3 0 0 1 6 0"/>
                                     <path d="M2 13c0 1 1 1 1 1h5.256A4.5 4.5 0 0 1 8 12.5a4.5 4.5 0 0 1 1.544-3.393Q8.844 9.002 8 9c-5 0-6 3-6 4"/>
@@ -286,7 +286,7 @@ export default class FriendsComponent extends Component {
         }
 
         try {
-            const res = await fetch(`/friends/search?email=${query}`);
+            const res = await fetch(`/friends/search?nickname=${query}`);
             const users = await res.json();
 
             if (users.length === 0) {
@@ -294,10 +294,10 @@ export default class FriendsComponent extends Component {
                 return;
             }
 
-            searchResults.innerHTML = users.map(user => `
+            searchResults.innerHTML = users.map(user =>  `
                 <div class="friend-entry inner-window">
                     <span>${Utils.truncateEmail(user.email)}</span>
-                    <button class="socials-entry-btn friend-btn" data-id="${user.id}" data-status="${user.status}">
+                    <button class="socials-entry-btn friend-btn" data-id="${user.user_id}" data-status="${user.status}">
                     <svg class="socials-entry-img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
                         ${this._getUserIcon(user.status)}
                     </svg> 
@@ -318,26 +318,23 @@ export default class FriendsComponent extends Component {
     
         try {
             if (status === "friend") {
-                await fetch(`/friends/removeFriend`, {
-                    method: "POST",
+                await fetch(`/friends/${userId}`, {
+                    method: "DELETE",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ friend_id: userId })
                 });
                 btn.dataset.status = "not_friend";
                 btn.innerHTML = `<svg class="socials-entry-img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">${this._getUserIcon("not_friend")}</svg>`;
             } else if (status === "not_friend") {
-                await fetch(`/friends/request`, {
+                await fetch(`/friends/${userId}/request`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ friend_id: userId })
                 });
                 btn.dataset.status = "requested";
                 btn.innerHTML = `<svg class="socials-entry-img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">${this._getUserIcon("requested")}</svg>`
             } else if (status === "requested") {
-                await fetch(`/friends/cancel`, {
+                await fetch(`/friends/${userId}/request/cancel`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ receiver_id: userId })
                 });
                 btn.dataset.status = "not_friend";
                 btn.innerHTML = `<svg class="socials-entry-img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">${this._getUserIcon("not_friend")}</svg>`;
@@ -359,10 +356,9 @@ export default class FriendsComponent extends Component {
     
         try {
             if (status === "friend") {
-                await fetch(`/friends/removeFriend`, {
-                    method: "POST",
+                await fetch(`/friends/${userId}`, {
+                    method: "DELETE",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ friend_id: userId })
                 });
                 btn.dataset.status = "not_friend";
                 btn.innerHTML = `<svg class="socials-entry-img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">${this._getUserIcon("not-friend")}</svg>`
@@ -391,10 +387,7 @@ export default class FriendsComponent extends Component {
         const messagesId = btn.dataset.id;
     
         try {
-            const res = await fetch(`/friends/getMessages?friend_id=${messagesId}`, {
-                method: "GET",
-                headers: { "Content-Type": "application/json" }
-            });
+            const res = await fetch(`/friends/${messagesId}/messages`);
     
             if (res.ok) {
                 const result = await res.json();
@@ -419,10 +412,9 @@ export default class FriendsComponent extends Component {
     }
     async _handleAcceptRequest(requestId) {
         try {
-            await fetch(`/friends/accept`, {
+            await fetch(`/friends/${requestId}/request/accept`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ sender_id: requestId })
             });
             this._fetchRequests();
         } catch (error) {
@@ -431,10 +423,9 @@ export default class FriendsComponent extends Component {
     }
     async _handleDeclineRequest(requestId) {
         try {
-            await fetch(`/friends/decline`, {
+            await fetch(`/friends/${requestId}/request/decline`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ sender_id: requestId })
             });
             this._fetchRequests();
         } catch (error) {

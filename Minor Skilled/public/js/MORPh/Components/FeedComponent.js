@@ -1,4 +1,4 @@
-import { Component, Utils, Pages} from "../Package.js";
+import { Component, Utils, Pages } from "../Package.js";
 
 export default class FeedComponent extends Component {
     wrapperClassList = "window recent-activity";

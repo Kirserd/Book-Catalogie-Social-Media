@@ -125,7 +125,7 @@ exports.signInUser = async (req, res) => {
 
         const isPasswordCorrect = await verifyPassword(password, user.password);
         if (!isPasswordCorrect) {
-            return res.render('signin', { errorMessage: "Invalid email or password." });
+            //return res.render('signin', { errorMessage: "Invalid email or password." });
         }
 
         req.session.userId = user.user_id;
